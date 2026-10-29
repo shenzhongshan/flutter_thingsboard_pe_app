@@ -1,0 +1,166 @@
+@use './styles/variables.scss' as *;
+
+page {
+  background: $background;
+  color: $text-primary;
+  font-size: 28px;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', 'Microsoft YaHei', sans-serif;
+  height: 100%;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background: $background;
+}
+
+.page-scroll {
+  flex: 1;
+  height: 0;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 88px;
+  border-radius: 12px;
+  font-size: 30px;
+  background: $primary;
+  color: #fff;
+  border: none;
+  margin: 0;
+  padding: 0 32px;
+  line-height: 88px;
+
+  &::after {
+    border: none;
+  }
+
+  &.btn-outline {
+    background: transparent;
+    color: $primary;
+    border: 1px solid $primary;
+  }
+
+  &.btn-danger {
+    background: $danger;
+  }
+
+  &.btn-small {
+    height: 64px;
+    line-height: 64px;
+    font-size: 26px;
+    padding: 0 24px;
+  }
+
+  &[disabled] {
+    opacity: 0.5;
+  }
+}
+
+.form-item {
+  margin-bottom: 32px;
+}
+
+.form-label {
+  display: block;
+  font-size: 26px;
+  color: $text-secondary;
+  margin-bottom: 12px;
+}
+
+.form-input {
+  height: 88px;
+  padding: 0 24px;
+  border: 1px solid $border;
+  border-radius: 12px;
+  background: $surface;
+  font-size: 30px;
+}
+
+.link {
+  color: $primary;
+  font-size: 28px;
+}
+
+.muted {
+  color: $text-secondary;
+  font-size: 24px;
+}
+
+.list-card {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin: 16px 24px 0;
+  padding: 28px;
+  background: $surface;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.list-card-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.list-card-title {
+  font-size: 30px;
+  font-weight: 600;
+  color: $text-primary;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.list-card-sub {
+  font-size: 24px;
+  color: $text-secondary;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tag {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 8px;
+  font-size: 22px;
+  color: #fff;
+}
+
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 36px;
+  position: relative;
+}
+
+.toolbar-dot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  min-width: 28px;
+  height: 28px;
+  line-height: 28px;
+  border-radius: 14px;
+  background: $danger;
+  color: #fff;
+  font-size: 18px;
+  text-align: center;
+}
+
+taro-button-core.btn-small {
+  width: auto;
+}

@@ -1,0 +1,27 @@
+/// <reference types="@tarojs/taro" />
+
+declare module '*.png'
+declare module '*.gif'
+declare module '*.jpg'
+declare module '*.jpeg'
+declare module '*.svg'
+declare module '*.css'
+declare module '*.less'
+declare module '*.scss'
+declare module '*.sass'
+declare module '*.styl'
+
+/** 构建时注入的常量，见 config/index.ts defineConstants */
+declare const TB_API_ENDPOINT: string
+declare const TB_MOBILE_PKG_NAME: string
+declare const TB_MOBILE_PLATFORM: string
+
+declare namespace NodeJS {
+  interface ProcessEnv {
+    /** NODE 内置环境变量, 会影响到最终构建生成产物 */
+    NODE_ENV: 'development' | 'production'
+    /** 当前构建的平台 */
+    TARO_ENV: 'weapp' | 'swan' | 'alipay' | 'h5' | 'rn' | 'tt' | 'qq' | 'jd' | 'harmony' | 'jdrn'
+    TARO_APP_ID: string
+  }
+}

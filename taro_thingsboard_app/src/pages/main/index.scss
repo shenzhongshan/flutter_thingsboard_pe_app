@@ -1,0 +1,88 @@
+@use '../../styles/variables.scss' as *;
+
+.splash {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: linear-gradient(160deg, #23405f, $primary 60%, $primary-light);
+}
+
+.splash-logo {
+  color: #fff;
+  font-size: 60px;
+  font-weight: 700;
+}
+
+.splash-sub {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 26px;
+}
+
+.main-content {
+  flex: 1;
+  height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.tab-pane {
+  flex: 1;
+  height: 0;
+  flex-direction: column;
+}
+
+.bottom-bar {
+  display: flex;
+  background: $surface;
+  border-top: 1px solid $divider;
+  padding-bottom: constant(safe-area-inset-bottom);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.bottom-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 0 10px;
+  min-width: 0;
+}
+
+.bottom-icon {
+  position: relative;
+}
+
+.bottom-badge {
+  position: absolute;
+  top: -10px;
+  left: 30px;
+  min-width: 32px;
+  height: 32px;
+  line-height: 32px;
+  padding: 0 8px;
+  border-radius: 16px;
+  background: $danger;
+  color: #fff;
+  font-size: 20px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.bottom-label {
+  margin-top: 4px;
+  font-size: 22px;
+  color: #8a8a8a;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &.selected {
+    color: $primary;
+    font-weight: 600;
+  }
+}

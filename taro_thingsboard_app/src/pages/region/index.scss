@@ -1,0 +1,41 @@
+.region-page {
+  padding: 32px;
+}
+
+.region-tip {
+  display: block;
+  font-size: 28px;
+  color: rgba(0, 0, 0, 0.54);
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+
+.region-card {
+  margin-bottom: 32px;
+}
+
+.region-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32px 0;
+  border-bottom: 1px solid #eee;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.region-label {
+  font-size: 30px;
+}
+
+.note {
+  display: block;
+  margin-top: 12px;
+  line-height: 1.6;
+}
+
+.save-btn {
+  margin-top: 16px;
+}

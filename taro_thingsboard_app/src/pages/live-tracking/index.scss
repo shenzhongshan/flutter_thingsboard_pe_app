@@ -1,0 +1,25 @@
+.tracking-page {
+  height: 100vh;
+}
+
+.tracking-actions {
+  margin: 0 24px;
+}
+
+.tracking-note {
+  display: block;
+  margin-top: 16px;
+  line-height: 1.6;
+}
+
+.device-option {
+  display: flex;
+  justify-content: space-between;
+  padding: 28px 0;
+  border-bottom: 1px solid #eee;
+
+  &.selected {
+    color: #305680;
+    font-weight: 600;
+  }
+}

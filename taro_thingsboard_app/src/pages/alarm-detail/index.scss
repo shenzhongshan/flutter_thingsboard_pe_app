@@ -1,0 +1,101 @@
+@use '../../styles/variables.scss' as *;
+
+.alarm-head {
+  margin: 24px 24px 0;
+  padding: 32px;
+  background: $surface;
+  border-radius: 16px;
+  border-left: 12px solid $primary;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.alarm-type {
+  font-size: 36px;
+  font-weight: 600;
+}
+
+.details-json {
+  display: block;
+  padding: 24px 0;
+  font-family: Menlo, monospace;
+  font-size: 22px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  color: $text-secondary;
+}
+
+.alarm-actions {
+  display: flex;
+  gap: 24px;
+  margin: 0 24px;
+
+  .btn {
+    flex: 1;
+  }
+}
+
+.no-comments {
+  display: block;
+  padding: 32px 0;
+  text-align: center;
+}
+
+.comment {
+  display: flex;
+  gap: 20px;
+  padding: 24px 0;
+  border-bottom: 1px solid $divider;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.comment-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.comment-author {
+  font-weight: 600;
+  font-size: 26px;
+}
+
+.comment-text {
+  font-size: 28px;
+  word-break: break-all;
+
+  &.system {
+    color: $text-secondary;
+    font-style: italic;
+  }
+}
+
+.comment-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  background: $surface;
+  border-top: 1px solid $divider;
+}
+
+.comment-input {
+  flex: 1;
+  height: 72px;
+  padding: 0 24px;
+  border-radius: 36px;
+  background: $background;
+  font-size: 28px;
+}
+
+.comment-bar .btn {
+  flex: none;
+  width: auto;
+}

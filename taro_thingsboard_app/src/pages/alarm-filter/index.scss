@@ -1,0 +1,26 @@
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 28px 0 12px;
+}
+
+.assignee-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32px 0;
+  font-size: 30px;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 24px;
+  padding: 24px 32px;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  background: #fff;
+  border-top: 1px solid #eee;
+
+  .btn {
+    flex: 1;
+  }
+}

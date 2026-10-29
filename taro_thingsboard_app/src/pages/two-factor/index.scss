@@ -1,0 +1,44 @@
+.twofa-page {
+  padding: 8px 0 48px;
+}
+
+.twofa-card {
+  margin: 24px;
+  padding: 40px 32px;
+}
+
+.twofa-head {
+  margin-bottom: 16px;
+}
+
+.twofa-title {
+  font-size: 34px;
+  font-weight: 600;
+}
+
+.twofa-hint {
+  display: block;
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+
+.code-input {
+  margin-bottom: 32px;
+  font-size: 40px;
+  letter-spacing: 12px;
+  text-align: center;
+}
+
+.resend {
+  margin-top: 28px;
+  text-align: center;
+}
+
+.other-providers {
+  padding: 0;
+}
+
+.cancel {
+  text-align: center;
+  margin-top: 48px;
+}
