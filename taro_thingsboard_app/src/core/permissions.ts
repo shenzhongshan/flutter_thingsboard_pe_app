@@ -27,7 +27,14 @@ export function hasReadGenericPermission(info: AllowedPermissionsInfo | null | u
 
 export function hasSharedReadGroupsPermission(info: AllowedPermissionsInfo | null | undefined, entityType: string) {
   const ids = info?.userPermissions?.readGroupPermissions?.[entityType]?.entityGroupIds
-  return !!ids && ids.length > 0
+  if (ids && ids.length > 0) return true
+  // 兼容不返回 readGroupPermissions 的服务器版本：检查共享给用户的实体组权限
+  const groups = info?.userPermissions?.groupPermissions
+  if (!groups) return false
+  return Object.keys(groups).some((id) => {
+    const g = groups[id]
+    return g?.entityType === entityType && !!g.operations && (g.operations.includes('READ') || g.operations.includes('ALL'))
+  })
 }
 
 export function hasReadGenericOrSharedGroupsPermission(

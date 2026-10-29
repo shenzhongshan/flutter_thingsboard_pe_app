@@ -1,6 +1,6 @@
 import { Text, View } from '@tarojs/components'
 import { useState } from 'react'
-import { entityAttribute, entityField, findDevices } from '../api/entities'
+import { entityField, findDevices, isDeviceActive } from '../api/entities'
 import type { EntityData } from '../api/types'
 import { Segmented } from '../components/Cells'
 import Icon from '../components/Icon'
@@ -50,7 +50,7 @@ export default function DeviceListView({ deviceType, active }: { deviceType?: st
         keyOf={(d) => d.entityId.id}
         emptyText='暂无设备'
         renderItem={(d) => {
-          const isActive = entityAttribute(d, 'active') === 'true'
+          const isActive = isDeviceActive(d)
           const name = entityField(d, 'name') || '-'
           const label = entityField(d, 'label')
           return (

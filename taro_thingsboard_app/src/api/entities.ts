@@ -106,8 +106,23 @@ export function getDevice(id: string) {
   return http.get<Device>(`/api/device/${id}`)
 }
 
+/**
+ * 设备在线状态 active 的存储位置：默认是服务端属性；服务器开启
+ * state.persistToTelemetry 时（/api/system/params 的 persistDeviceStateToTelemetry）存为遥测。
+ * 与 ThingsBoard Web UI 的处理一致。
+ */
+let deviceStateKeyType: 'ATTRIBUTE' | 'TIME_SERIES' = 'ATTRIBUTE'
+
+export function setPersistDeviceStateToTelemetry(value: boolean) {
+  deviceStateKeyType = value ? 'TIME_SERIES' : 'ATTRIBUTE'
+}
+
+export function getSystemParams() {
+  return http.get<{ persistDeviceStateToTelemetry?: boolean }>('/api/system/params', undefined, { silent: true })
+}
+
 const activeKeyFilter = (active: boolean) => ({
-  key: { type: 'ATTRIBUTE', key: 'active' },
+  key: { type: deviceStateKeyType, key: 'active' },
   valueType: 'BOOLEAN',
   predicate: {
     type: 'BOOLEAN',
@@ -147,7 +162,7 @@ export function findDevices(params: {
       { type: 'ENTITY_FIELD', key: 'label' },
       { type: 'ENTITY_FIELD', key: 'createdTime' }
     ],
-    latestValues: [{ type: 'ATTRIBUTE', key: 'active' }],
+    latestValues: [{ type: deviceStateKeyType, key: 'active' }],
     pageLink: {
       pageSize: params.pageSize ?? DEFAULT_PAGE_SIZE,
       page: params.page,
@@ -165,8 +180,8 @@ export function entityField(data: EntityData, key: string): string | undefined {
   return data.latest?.ENTITY_FIELD?.[key]?.value
 }
 
-export function entityAttribute(data: EntityData, key: string): string | undefined {
-  return data.latest?.ATTRIBUTE?.[key]?.value
+export function isDeviceActive(data: EntityData): boolean {
+  return data.latest?.[deviceStateKeyType]?.active?.value === 'true'
 }
 
 /* ---------- 属性 / 遥测 ---------- */

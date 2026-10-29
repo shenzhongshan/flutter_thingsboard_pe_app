@@ -109,3 +109,15 @@ test('custom pages map to dashboard / url targets', () => {
   assert.deepEqual(navTargetForLayout(pages[2]), { kind: 'url', url: 'https://example.com' })
   assert.equal(buildNavigation(pages, 'TENANT_ADMIN', null).bottomBar[0].icon, 'factory')
 })
+
+test('shared group read falls back to groupPermissions', () => {
+  const info = {
+    userPermissions: {
+      genericPermissions: {},
+      groupPermissions: { g1: { entityType: 'CUSTOMER', operations: ['READ', 'RPC_CALL'] }, g2: { entityType: 'ASSET', operations: ['WRITE'] } }
+    }
+  }
+  assert.equal(hasReadGenericOrSharedGroupsPermission(info, 'CUSTOMER', 'CUSTOMER'), true)
+  assert.equal(hasReadGenericOrSharedGroupsPermission(info, 'ASSET', 'ASSET'), false)
+  assert.equal(hasReadGenericOrSharedGroupsPermission(info, 'DEVICE', 'DEVICE'), false)
+})

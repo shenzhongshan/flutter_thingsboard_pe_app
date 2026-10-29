@@ -84,6 +84,8 @@ export interface UserMobileInfo {
 export interface MergedUserPermissions {
   genericPermissions?: Record<string, string[]>
   readGroupPermissions?: Record<string, { entityGroupIds?: string[] }>
+  /** 部分 PE 版本只返回 groupPermissions（实体组 ID → 类型与操作） */
+  groupPermissions?: Record<string, { entityType?: string; operations?: string[] }>
 }
 
 export interface AllowedPermissionsInfo {

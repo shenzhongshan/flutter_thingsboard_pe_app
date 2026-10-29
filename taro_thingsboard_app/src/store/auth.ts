@@ -1,5 +1,5 @@
 import * as authApi from '../api/auth'
-import { getAllowedPermissions } from '../api/entities'
+import { getAllowedPermissions, getSystemParams, setPersistDeviceStateToTelemetry } from '../api/entities'
 import { refreshJwtToken, session } from '../api/http'
 import type { AllowedPermissionsInfo, HomeDashboardInfo, LoginResponse, User } from '../api/types'
 import { buildNavigation, parsePageLayouts, type NavigationState } from '../core/navigation'
@@ -56,12 +56,14 @@ export async function loadUser(): Promise<void> {
     resetState('unauthenticated')
     return
   }
-  const [user, mobileInfo, permissions] = await Promise.all([
+  const [user, mobileInfo, permissions, systemParams] = await Promise.all([
     authApi.getCurrentUser(),
     authApi.getUserMobileInfo().catch(() => null),
     // 系统管理员没有 RBAC 角色；接口失败时放行导航
-    authUser.authority === 'SYS_ADMIN' ? Promise.resolve(null) : getAllowedPermissions().catch(() => null)
+    authUser.authority === 'SYS_ADMIN' ? Promise.resolve(null) : getAllowedPermissions().catch(() => null),
+    getSystemParams().catch(() => null)
   ])
+  setPersistDeviceStateToTelemetry(!!systemParams?.persistDeviceStateToTelemetry)
   const layouts = parsePageLayouts(mobileInfo?.pages)
   authStore.set({
     status: 'authenticated',
