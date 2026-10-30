@@ -22,7 +22,9 @@ export default defineConfig<'webpack5'>(async (merge) => {
       // 构建时可通过环境变量注入默认服务器地址，与 Flutter 版 --dart-define=thingsboardApiEndpoint 对应
       TB_API_ENDPOINT: JSON.stringify(process.env.TB_API_ENDPOINT || ''),
       TB_MOBILE_PKG_NAME: JSON.stringify(process.env.TB_MOBILE_PKG_NAME || ''),
-      TB_MOBILE_PLATFORM: JSON.stringify(process.env.TB_MOBILE_PLATFORM || 'ANDROID')
+      TB_MOBILE_PLATFORM: JSON.stringify(process.env.TB_MOBILE_PLATFORM || ''),
+      // 当前小程序版本，用于与移动中心配置的最低 / 最新版本比较（正式版以微信返回的版本号为准）
+      TB_APP_VERSION: JSON.stringify(process.env.TB_APP_VERSION || require('../package.json').version)
     },
     copy: {
       patterns: [],

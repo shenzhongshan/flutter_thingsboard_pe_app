@@ -15,6 +15,7 @@ declare module '*.styl'
 declare const TB_API_ENDPOINT: string
 declare const TB_MOBILE_PKG_NAME: string
 declare const TB_MOBILE_PLATFORM: string
+declare const TB_APP_VERSION: string
 
 declare namespace NodeJS {
   interface ProcessEnv {

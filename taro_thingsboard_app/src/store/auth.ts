@@ -1,7 +1,7 @@
 import * as authApi from '../api/auth'
 import { getAllowedPermissions, getSystemParams, setPersistDeviceStateToTelemetry } from '../api/entities'
 import { refreshJwtToken, session } from '../api/http'
-import type { AllowedPermissionsInfo, HomeDashboardInfo, LoginResponse, User } from '../api/types'
+import type { AllowedPermissionsInfo, HomeDashboardInfo, LoginResponse, MobileVersionInfo, User } from '../api/types'
 import { buildNavigation, parsePageLayouts, type NavigationState } from '../core/navigation'
 import { appEvents } from '../utils/events'
 import { decodeJwt, isTokenExpired, type AuthUser } from '../utils/jwt'
@@ -20,6 +20,8 @@ export interface AuthState {
   permissions: AllowedPermissionsInfo | null
   homeDashboard: HomeDashboardInfo | null
   navigation: NavigationState
+  /** 移动中心配置的版本信息（最低版本 / 最新版本） */
+  versionInfo: MobileVersionInfo | null
 }
 
 const emptyNavigation: NavigationState = { bottomBar: [], more: [] }
@@ -30,7 +32,8 @@ export const authStore = createStore<AuthState>({
   user: null,
   permissions: null,
   homeDashboard: null,
-  navigation: emptyNavigation
+  navigation: emptyNavigation,
+  versionInfo: null
 })
 
 function resetState(status: AuthStatus) {
@@ -40,7 +43,8 @@ function resetState(status: AuthStatus) {
     user: null,
     permissions: null,
     homeDashboard: null,
-    navigation: emptyNavigation
+    navigation: emptyNavigation,
+    versionInfo: null
   })
 }
 
@@ -71,7 +75,8 @@ export async function loadUser(): Promise<void> {
     user,
     permissions,
     homeDashboard: mobileInfo?.homeDashboardInfo?.dashboardId ? mobileInfo.homeDashboardInfo : null,
-    navigation: buildNavigation(layouts, authUser.authority, permissions)
+    navigation: buildNavigation(layouts, authUser.authority, permissions),
+    versionInfo: mobileInfo?.versionInfo || null
   })
 }
 

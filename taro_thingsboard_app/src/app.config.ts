@@ -14,7 +14,8 @@ export default defineAppConfig({
     'pages/webview/index',
     'pages/profile/index',
     'pages/change-password/index',
-    'pages/live-tracking/index'
+    'pages/live-tracking/index',
+    'pages/update/index'
   ],
   window: {
     backgroundTextStyle: 'dark',

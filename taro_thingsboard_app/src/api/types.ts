@@ -51,10 +51,17 @@ export interface OAuth2ClientLoginInfo {
   url: string
 }
 
+export interface MobileVersionInfo {
+  minVersion?: string | null
+  minVersionReleaseNotes?: string | null
+  latestVersion?: string | null
+  latestVersionReleaseNotes?: string | null
+}
+
 export interface LoginMobileInfo {
   oAuth2ClientLoginInfos?: OAuth2ClientLoginInfo[]
   selfRegistrationParams?: any
-  versionInfo?: any
+  versionInfo?: MobileVersionInfo | null
   storeInfo?: any
 }
 
@@ -77,7 +84,7 @@ export interface UserMobileInfo {
   user?: User
   homeDashboardInfo?: HomeDashboardInfo | null
   pages?: PageLayoutJson[] | null
-  versionInfo?: any
+  versionInfo?: MobileVersionInfo | null
   storeInfo?: any
 }
 

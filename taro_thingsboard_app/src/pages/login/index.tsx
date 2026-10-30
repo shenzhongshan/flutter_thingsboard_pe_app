@@ -6,6 +6,7 @@ import { session } from '../../api/http'
 import Icon from '../../components/Icon'
 import { FIXED_API_ENDPOINT } from '../../config'
 import { applyLoginResponse, loginWithPassword, type AuthStatus } from '../../store/auth'
+import { handleVersionInfo } from '../../store/version'
 import { Routes, go, relaunch } from '../../utils/router'
 import { normalizeEndpoint, parseUrl } from '../../utils/url'
 import './index.scss'
@@ -38,7 +39,10 @@ export default function LoginPage() {
     setEndpoint(current)
     if (!current) return
     getLoginMobileInfo()
-      .then((info) => setOauthCount(info?.oAuth2ClientLoginInfos?.length || 0))
+      .then((info) => {
+        setOauthCount(info?.oAuth2ClientLoginInfos?.length || 0)
+        handleVersionInfo(info?.versionInfo)
+      })
       .catch(() => setOauthCount(0))
   })
 
