@@ -1,6 +1,7 @@
+import Taro from '@tarojs/taro'
 import * as authApi from '../api/auth'
 import { getAllowedPermissions, getSystemParams, setPersistDeviceStateToTelemetry } from '../api/entities'
-import { refreshJwtToken, session } from '../api/http'
+import { ApiError, refreshJwtToken, session } from '../api/http'
 import type { AllowedPermissionsInfo, HomeDashboardInfo, LoginResponse, MobileVersionInfo, User } from '../api/types'
 import { buildNavigation, parsePageLayouts, type NavigationState } from '../core/navigation'
 import { appEvents } from '../utils/events'
@@ -52,6 +53,22 @@ appEvents.on('unauthorized', () => {
   if (authStore.get().status !== 'unauthenticated') resetState('unauthenticated')
 })
 
+/**
+ * 租户自行注册的小程序只服务本租户的用户：其他租户的账号登录后，/api/mobile 返回 403。
+ */
+export class TenantMismatchError extends Error {
+  constructor() {
+    super('该账号不属于本小程序所属的租户，请使用本租户的账号登录。')
+  }
+}
+
+/** 弹窗提示登录过程中的租户不匹配；其他错误已由 http 层提示。 */
+export function showLoginError(e: unknown) {
+  if (e instanceof TenantMismatchError) {
+    Taro.showModal({ title: '无法登录', content: e.message, showCancel: false })
+  }
+}
+
 /** 加载用户信息、PE 权限与服务器下发的移动端布局。 */
 export async function loadUser(): Promise<void> {
   const token = session.getToken()
@@ -60,13 +77,26 @@ export async function loadUser(): Promise<void> {
     resetState('unauthenticated')
     return
   }
-  const [user, mobileInfo, permissions, systemParams] = await Promise.all([
-    authApi.getCurrentUser(),
-    authApi.getUserMobileInfo().catch(() => null),
-    // 系统管理员没有 RBAC 角色；接口失败时放行导航
-    authUser.authority === 'SYS_ADMIN' ? Promise.resolve(null) : getAllowedPermissions().catch(() => null),
-    getSystemParams().catch(() => null)
-  ])
+  let results
+  try {
+    results = await Promise.all([
+      authApi.getCurrentUser(),
+      authApi.getUserMobileInfo().catch((e) => {
+        if (e instanceof ApiError && e.status === 403) throw new TenantMismatchError()
+        return null
+      }),
+      // 系统管理员没有 RBAC 角色；接口失败时放行导航
+      authUser.authority === 'SYS_ADMIN' ? Promise.resolve(null) : getAllowedPermissions().catch(() => null),
+      getSystemParams().catch(() => null)
+    ])
+  } catch (e) {
+    if (e instanceof TenantMismatchError) {
+      await authApi.logout()
+      resetState('unauthenticated')
+    }
+    throw e
+  }
+  const [user, mobileInfo, permissions, systemParams] = results
   setPersistDeviceStateToTelemetry(!!systemParams?.persistDeviceStateToTelemetry)
   const layouts = parsePageLayouts(mobileInfo?.pages)
   authStore.set({
