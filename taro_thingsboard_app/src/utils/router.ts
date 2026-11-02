@@ -19,7 +19,8 @@ export const Routes = {
   webview: '/pages/webview/index',
   profile: '/pages/profile/index',
   changePassword: '/pages/change-password/index',
-  liveTracking: '/pages/live-tracking/index'
+  liveTracking: '/pages/live-tracking/index',
+  update: '/pages/update/index'
 } as const
 
 export function go(path: string, params: Record<string, unknown> = {}) {

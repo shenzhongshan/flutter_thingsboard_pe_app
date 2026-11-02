@@ -32,5 +32,6 @@ export const StorageKeys = {
   token: 'tb_jwt_token',
   refreshToken: 'tb_refresh_token',
   alarmFilters: 'tb_alarm_filters',
-  liveTracking: 'tb_live_tracking'
+  liveTracking: 'tb_live_tracking',
+  dismissedVersion: 'tb_dismissed_version'
 } as const

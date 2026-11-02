@@ -20,18 +20,35 @@ npm run typecheck
 
 ### 构建参数（环境变量）
 
-| 变量 | 作用 | 对应 Flutter 版 |
+| 变量 | 作用 | 默认值 |
 | --- | --- | --- |
-| `TB_API_ENDPOINT` | 固定服务器地址，设置后隐藏「选择服务器」 | `--dart-define=thingsboardApiEndpoint` |
-| `TB_MOBILE_PKG_NAME` | 调用 `/api/mobile` 获取移动端布局时使用的包名，默认 `org.thingsboard.pe.miniprogram` | 应用包名 |
-| `TB_MOBILE_PLATFORM` | 平台，默认 `ANDROID` | 设备平台 |
+| `TB_API_ENDPOINT` | 固定服务器地址，设置后隐藏「选择服务器」（对应 Flutter 版 `thingsboardApiEndpoint`） | 空（由用户选择） |
+| `TB_MOBILE_PKG_NAME` | 查询移动中心时使用的包名 | 当前小程序的 AppID（运行时读取） |
+| `TB_MOBILE_PLATFORM` | 查询移动中心时使用的平台 | `WECHAT_MINIPROGRAM`，服务器不支持时自动回退为 `ANDROID` |
+| `TB_APP_VERSION` | 开发版 / 体验版的版本号（正式版使用微信返回的版本号） | `package.json` 中的 `version` |
 
 ```bash
-TB_API_ENDPOINT=https://iot.example.com TB_MOBILE_PKG_NAME=com.example.app npm run build:weapp
+TB_API_ENDPOINT=https://iot.example.com npm run build:weapp
 ```
 
-要让服务器端配置的底部导航、首页仪表板生效，需要在 ThingsBoard PE「移动中心」中登记与
-`TB_MOBILE_PKG_NAME` / `TB_MOBILE_PLATFORM` 相同的应用；否则按用户角色使用默认布局（与 Flutter 版一致）。
+### 移动中心配置
+
+小程序通过 `/api/mobile` 获取底部导航、首页仪表板与版本信息：
+
+- **pe2ce 服务器（支持微信小程序平台）**：在「移动中心 → 应用」中新增平台为「微信小程序」的应用，包名填小程序 AppID，
+  再在「移动中心 → 应用包」中把它选为「微信小程序应用」并配置布局。无需任何构建参数。
+- **原版 ThingsBoard**：服务器不认识 `WECHAT_MINIPROGRAM`，小程序会自动改用 `ANDROID` 平台、包名
+  `org.thingsboard.pe.miniprogram`（可用 `TB_MOBILE_PKG_NAME` 覆盖）。在移动中心登记一个同名 Android 应用即可。
+- 两种情况下都没有登记时，按用户角色使用默认导航。
+
+### 版本检查
+
+移动中心应用中的「版本信息」对小程序同样生效（对应 Flutter 版的强制更新页）：
+
+- 当前版本低于**最低版本**：进入「需要更新」页，显示最低版本的更新说明，点击「立即更新」通过微信 `UpdateManager` 下载并重启；
+- 低于**最新版本**：弹窗提示一次，可选择稍后（每个最新版本只提示一次）。
+
+正式版的版本号就是上传代码时填写的版本号，请与移动中心中配置的版本保持同一格式（如 `1.2.0`）。
 
 ### 微信公众平台配置（必需）
 
@@ -48,6 +65,7 @@ TB_API_ENDPOINT=https://iot.example.com TB_MOBILE_PKG_NAME=com.example.app npm r
 | 双因素认证 (`core/auth/2FA/confirm`) | `pages/two-factor` | TOTP / 短信 / 邮箱 / 备用码，支持切换方式、重发倒计时 |
 | 忘记密码 (`core/auth/reset_password`) | `pages/reset-password` | |
 | 扫码登录 (`core/auth/noauth`) | 登录页「扫码登录」 | 扫描 Web 端移动应用二维码，`/api/noauth/qr/{secret}` 换取令牌 |
+| 版本检查 (`modules/version`) | `store/version.ts`、`pages/update` | 最低版本强制更新、最新版本提示 |
 | 动态底部导航 (`modules/main`) | `pages/main` + `core/navigation.ts` | 服务器布局 / 角色默认布局，PE RBAC 过滤，3 项 + 更多（少于 4 项时为个人资料） |
 | 首页 (`modules/home`) | `views/HomeView` | 首页仪表板入口 + 仪表板列表；系统管理员显示租户列表 |
 | 仪表板 (`modules/dashboard`) | `pages/dashboard`（web-view） | 通过 `accessToken`/`refreshToken` 参数建立会话；支持 `state` 定位实体 |

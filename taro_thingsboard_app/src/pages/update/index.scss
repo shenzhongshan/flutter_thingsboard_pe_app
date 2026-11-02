@@ -1,0 +1,37 @@
+.update-page {
+  height: 100vh;
+}
+
+.update-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 96px 48px 32px;
+}
+
+.update-title {
+  font-size: 40px;
+  font-weight: 600;
+}
+
+.update-notes {
+  margin: 24px;
+  padding: 32px;
+}
+
+.update-notes-title {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.update-notes-text {
+  white-space: pre-wrap;
+  line-height: 1.6;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.update-actions {
+  margin: 32px 24px;
+}

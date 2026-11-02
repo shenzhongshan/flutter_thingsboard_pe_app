@@ -1,5 +1,12 @@
-import { MOBILE_PKG_NAME, MOBILE_PLATFORM } from '../config'
-import { http, session } from './http'
+import {
+  FALLBACK_PKG_NAME,
+  FALLBACK_PLATFORM,
+  MOBILE_PKG_NAME_OVERRIDE,
+  MOBILE_PLATFORM_OVERRIDE,
+  WECHAT_PLATFORM
+} from '../config'
+import { getAppId } from '../utils/appInfo'
+import { ApiError, http, session } from './http'
 import type { LoginMobileInfo, LoginResponse, TwoFaProviderInfo, User, UserMobileInfo } from './types'
 
 /** 认证相关接口，对应 Flutter 版 lib/core/auth/**。 */
@@ -29,22 +36,46 @@ export function changePassword(currentPassword: string, newPassword: string) {
   return http.post<LoginResponse | null>('/api/auth/changePassword', { currentPassword, newPassword })
 }
 
-/** 登录页信息：OAuth2 客户端、自助注册参数等（/api/noauth/mobile）。 */
+/* ---------- 移动中心 ---------- */
+
+/** 不支持 WECHAT_MINIPROGRAM 平台的服务器（按服务器地址记录），改用 ANDROID 平台查询。 */
+const legacyServers = new Set<string>()
+
+interface MobileParams {
+  pkgName: string
+  platform: string
+}
+
+/**
+ * 以小程序 AppID + WECHAT_MINIPROGRAM 查询移动中心；原版 ThingsBoard 不认识该平台会返回 400，
+ * 此时回退为 ANDROID 平台（包名默认 org.thingsboard.pe.miniprogram，可用 TB_MOBILE_PKG_NAME 覆盖）。
+ */
+async function withMobileParams<T>(call: (params: MobileParams) => Promise<T>): Promise<T> {
+  if (MOBILE_PLATFORM_OVERRIDE) {
+    return call({ pkgName: getAppId(), platform: MOBILE_PLATFORM_OVERRIDE })
+  }
+  const endpoint = session.getEndpoint()
+  if (!legacyServers.has(endpoint)) {
+    try {
+      return await call({ pkgName: getAppId(), platform: WECHAT_PLATFORM })
+    } catch (e) {
+      if (!(e instanceof ApiError) || e.status !== 400) throw e
+      legacyServers.add(endpoint)
+    }
+  }
+  return call({ pkgName: MOBILE_PKG_NAME_OVERRIDE || FALLBACK_PKG_NAME, platform: FALLBACK_PLATFORM })
+}
+
+/** 登录页信息：OAuth2 客户端、版本信息等（/api/noauth/mobile）。 */
 export function getLoginMobileInfo() {
-  return http.get<LoginMobileInfo>(
-    '/api/noauth/mobile',
-    { pkgName: MOBILE_PKG_NAME, platform: MOBILE_PLATFORM },
-    { auth: false, silent: true }
+  return withMobileParams((params) =>
+    http.get<LoginMobileInfo>('/api/noauth/mobile', { ...params }, { auth: false, silent: true })
   )
 }
 
-/** 登录后的移动端布局：底部导航页面、首页仪表板（/api/mobile）。 */
+/** 登录后的移动端布局：底部导航页面、首页仪表板、版本信息（/api/mobile）。 */
 export function getUserMobileInfo() {
-  return http.get<UserMobileInfo>(
-    '/api/mobile',
-    { pkgName: MOBILE_PKG_NAME, platform: MOBILE_PLATFORM },
-    { silent: true }
-  )
+  return withMobileParams((params) => http.get<UserMobileInfo>('/api/mobile', { ...params }, { silent: true }))
 }
 
 /* ---------- 双因素认证（2FA） ---------- */

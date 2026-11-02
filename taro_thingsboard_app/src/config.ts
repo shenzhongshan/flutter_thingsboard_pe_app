@@ -7,12 +7,16 @@
 export const FIXED_API_ENDPOINT: string = TB_API_ENDPOINT
 
 /**
- * 调用 /api/mobile 接口获取移动端布局（底部导航、首页仪表板）时使用的包名与平台。
- * 需要在 ThingsBoard PE「移动中心 → 应用」中登记同名应用，否则服务器返回空布局，
- * 小程序会回退到按用户角色生成的默认布局。
+ * 调用 /api/mobile 接口获取移动端布局（底部导航、首页仪表板）与版本信息时使用的包名与平台，
+ * 对应 ThingsBoard「移动中心 → 应用」中登记的应用。
+ * - 包名：默认取当前小程序的 AppID（见 utils/appInfo.ts），也可用 TB_MOBILE_PKG_NAME 覆盖；
+ * - 平台：默认 WECHAT_MINIPROGRAM；服务器不支持该平台时（原版 ThingsBoard）自动回退为 ANDROID。
  */
-export const MOBILE_PKG_NAME: string = TB_MOBILE_PKG_NAME || 'org.thingsboard.pe.miniprogram'
-export const MOBILE_PLATFORM: string = TB_MOBILE_PLATFORM || 'ANDROID'
+export const MOBILE_PKG_NAME_OVERRIDE: string = TB_MOBILE_PKG_NAME
+export const MOBILE_PLATFORM_OVERRIDE: string = TB_MOBILE_PLATFORM
+export const WECHAT_PLATFORM = 'WECHAT_MINIPROGRAM'
+export const FALLBACK_PLATFORM = 'ANDROID'
+export const FALLBACK_PKG_NAME = 'org.thingsboard.pe.miniprogram'
 
 export const NORTH_AMERICA_HOST = 'https://thingsboard.cloud'
 export const EUROPE_HOST = 'https://eu.thingsboard.cloud'

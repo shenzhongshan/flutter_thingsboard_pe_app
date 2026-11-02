@@ -70,7 +70,13 @@ export const session = {
 function errorMessage(status: number, data: any): string {
   if (data && typeof data === 'object' && data.message) return String(data.message)
   if (typeof data === 'string' && data) return data
-  if (status === 0) return '无法连接到服务器，请检查网络或服务器地址'
+  if (status === 0) {
+    const raw = String(data?.message || '')
+    if (raw.includes('url not in domain list')) {
+      return '服务器地址不在小程序合法域名列表中：开发时请在开发者工具勾选「不校验合法域名」或在手机上打开「开发调试」'
+    }
+    return '无法连接到服务器，请检查网络或服务器地址'
+  }
   if (status === 401) return '会话已过期，请重新登录'
   if (status === 403) return '没有权限执行该操作'
   if (status === 404) return '请求的资源不存在'
@@ -160,7 +166,11 @@ export async function request<T = any>(path: string, options: RequestOptions = {
   const err = new ApiError(errorMessage(res.status, res.data), res.status, res.data)
   // 已登录请求的 401 会跳转登录页，无需提示；登录接口等匿名请求的 401（如密码错误）需要提示
   if (!silent && (res.status !== 401 || !auth || !!token)) {
-    Taro.showToast({ title: err.message.slice(0, 40), icon: 'none', duration: 2500 })
+    if (err.message.length > 40) {
+      Taro.showModal({ title: '请求失败', content: err.message, showCancel: false })
+    } else {
+      Taro.showToast({ title: err.message, icon: 'none', duration: 2500 })
+    }
   }
   throw err
 }

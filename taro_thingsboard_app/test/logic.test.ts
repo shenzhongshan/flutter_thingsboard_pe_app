@@ -109,3 +109,30 @@ test('custom pages map to dashboard / url targets', () => {
   assert.deepEqual(navTargetForLayout(pages[2]), { kind: 'url', url: 'https://example.com' })
   assert.equal(buildNavigation(pages, 'TENANT_ADMIN', null).bottomBar[0].icon, 'factory')
 })
+
+test('shared group read falls back to groupPermissions', () => {
+  const info = {
+    userPermissions: {
+      genericPermissions: {},
+      groupPermissions: { g1: { entityType: 'CUSTOMER', operations: ['READ', 'RPC_CALL'] }, g2: { entityType: 'ASSET', operations: ['WRITE'] } }
+    }
+  }
+  assert.equal(hasReadGenericOrSharedGroupsPermission(info, 'CUSTOMER', 'CUSTOMER'), true)
+  assert.equal(hasReadGenericOrSharedGroupsPermission(info, 'ASSET', 'ASSET'), false)
+  assert.equal(hasReadGenericOrSharedGroupsPermission(info, 'DEVICE', 'DEVICE'), false)
+})
+
+test('version comparison and update status', async () => {
+  const { checkUpdate, compareVersions } = await import('../src/core/version')
+  assert.equal(compareVersions('1.2.3', '1.2.3'), 0)
+  assert.ok(compareVersions('1.2.3', '1.10.0') < 0)
+  assert.ok(compareVersions('2.0.0', '1.99.99') > 0)
+  assert.equal(compareVersions('1.2', '1.2.0'), 0)
+  assert.equal(compareVersions('1.2.3-beta+5', '1.2.3'), 0)
+  assert.equal(compareVersions('garbage', '1.0.0'), 0)
+  assert.equal(checkUpdate('1.0.0', null), 'none')
+  assert.equal(checkUpdate('1.0.0', { minVersion: '1.1.0', latestVersion: '1.2.0' }), 'required')
+  assert.equal(checkUpdate('1.1.0', { minVersion: '1.1.0', latestVersion: '1.2.0' }), 'available')
+  assert.equal(checkUpdate('1.2.0', { minVersion: '1.1.0', latestVersion: '1.2.0' }), 'none')
+  assert.equal(checkUpdate('1.0.0', { minVersion: '', latestVersion: null }), 'none')
+})

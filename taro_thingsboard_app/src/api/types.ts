@@ -51,10 +51,17 @@ export interface OAuth2ClientLoginInfo {
   url: string
 }
 
+export interface MobileVersionInfo {
+  minVersion?: string | null
+  minVersionReleaseNotes?: string | null
+  latestVersion?: string | null
+  latestVersionReleaseNotes?: string | null
+}
+
 export interface LoginMobileInfo {
   oAuth2ClientLoginInfos?: OAuth2ClientLoginInfo[]
   selfRegistrationParams?: any
-  versionInfo?: any
+  versionInfo?: MobileVersionInfo | null
   storeInfo?: any
 }
 
@@ -77,13 +84,15 @@ export interface UserMobileInfo {
   user?: User
   homeDashboardInfo?: HomeDashboardInfo | null
   pages?: PageLayoutJson[] | null
-  versionInfo?: any
+  versionInfo?: MobileVersionInfo | null
   storeInfo?: any
 }
 
 export interface MergedUserPermissions {
   genericPermissions?: Record<string, string[]>
   readGroupPermissions?: Record<string, { entityGroupIds?: string[] }>
+  /** 部分 PE 版本只返回 groupPermissions（实体组 ID → 类型与操作） */
+  groupPermissions?: Record<string, { entityType?: string; operations?: string[] }>
 }
 
 export interface AllowedPermissionsInfo {

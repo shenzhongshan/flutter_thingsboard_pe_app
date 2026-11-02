@@ -5,7 +5,8 @@ import { exchangeQrSecret, getLoginMobileInfo } from '../../api/auth'
 import { session } from '../../api/http'
 import Icon from '../../components/Icon'
 import { FIXED_API_ENDPOINT } from '../../config'
-import { applyLoginResponse, loginWithPassword, type AuthStatus } from '../../store/auth'
+import { applyLoginResponse, loginWithPassword, showLoginError, type AuthStatus } from '../../store/auth'
+import { handleVersionInfo } from '../../store/version'
 import { Routes, go, relaunch } from '../../utils/router'
 import { normalizeEndpoint, parseUrl } from '../../utils/url'
 import './index.scss'
@@ -38,7 +39,10 @@ export default function LoginPage() {
     setEndpoint(current)
     if (!current) return
     getLoginMobileInfo()
-      .then((info) => setOauthCount(info?.oAuth2ClientLoginInfos?.length || 0))
+      .then((info) => {
+        setOauthCount(info?.oAuth2ClientLoginInfos?.length || 0)
+        handleVersionInfo(info?.versionInfo)
+      })
       .catch(() => setOauthCount(0))
   })
 
@@ -54,8 +58,8 @@ export default function LoginPage() {
     setLoading(true)
     try {
       afterLogin(await loginWithPassword(username.trim(), password))
-    } catch (_) {
-      // 错误提示已由 http 层统一处理
+    } catch (e) {
+      showLoginError(e)
     } finally {
       setLoading(false)
     }
@@ -90,8 +94,8 @@ export default function LoginPage() {
     try {
       const res = await exchangeQrSecret(host, secret)
       afterLogin(await applyLoginResponse(res))
-    } catch (_) {
-      // 已提示
+    } catch (e) {
+      showLoginError(e)
     } finally {
       Taro.hideLoading()
     }

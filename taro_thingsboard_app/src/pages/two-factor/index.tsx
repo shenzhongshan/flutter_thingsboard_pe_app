@@ -5,7 +5,7 @@ import { checkTwoFaVerificationCode, getAvailableTwoFaProviders, requestTwoFaVer
 import { session } from '../../api/http'
 import type { TwoFaProviderInfo } from '../../api/types'
 import Icon from '../../components/Icon'
-import { applyLoginResponse, authStore } from '../../store/auth'
+import { applyLoginResponse, authStore, showLoginError, TenantMismatchError } from '../../store/auth'
 import { Routes, relaunch } from '../../utils/router'
 import './index.scss'
 
@@ -80,8 +80,12 @@ export default function TwoFactorPage() {
         done.current = true
         relaunch(Routes.main)
       }
-    } catch (_) {
-      // 已提示
+    } catch (e) {
+      showLoginError(e)
+      if (e instanceof TenantMismatchError) {
+        done.current = true
+        relaunch(Routes.login)
+      }
     } finally {
       setLoading(false)
     }

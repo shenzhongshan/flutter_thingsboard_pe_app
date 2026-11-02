@@ -5,6 +5,7 @@ import { getUnreadNotificationsCount } from '../../api/notifications'
 import Icon from '../../components/Icon'
 import type { NavItem } from '../../core/navigation'
 import { authStore } from '../../store/auth'
+import { handleVersionInfo } from '../../store/version'
 import { appEvents } from '../../utils/events'
 import { openNavTarget, relaunchToLogin } from '../../utils/router'
 import ProfileView from '../../views/ProfileView'
@@ -52,9 +53,15 @@ export default function MainPage() {
   const hasNotifications = [...bottomBar, ...more].some((i) => i.showNotificationBadge)
   const unread = useUnreadCount(status === 'authenticated' && hasNotifications)
 
+  const versionInfo = authStore.use((s) => s.versionInfo)
+
   useEffect(() => {
     if (status === 'unauthenticated') relaunchToLogin()
   }, [status])
+
+  useEffect(() => {
+    if (status === 'authenticated') handleVersionInfo(versionInfo)
+  }, [status, versionInfo])
 
   // 布局加载完成后默认选中第一个页面
   useEffect(() => {
