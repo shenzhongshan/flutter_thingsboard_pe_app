@@ -65,7 +65,7 @@ TB_API_ENDPOINT=https://iot.example.com npm run build:weapp
 | 登录 (`core/auth/login`) | `pages/login` | 不提供 Flutter 版的区域选择，服务器地址由 `TB_API_ENDPOINT` 决定 |
 | 双因素认证 (`core/auth/2FA/confirm`) | `pages/two-factor` | TOTP / 短信 / 邮箱 / 备用码，支持切换方式、重发倒计时 |
 | 忘记密码 (`core/auth/reset_password`) | `pages/reset-password` | |
-| 扫码登录 (`core/auth/noauth`) | 登录页「扫码登录」 | 扫描 Web 端移动应用二维码，`/api/noauth/qr/{secret}` 换取令牌 |
+| 扫码登录 (`core/auth/noauth`) | 登录页「扫码登录」（入口已隐藏，`QR_LOGIN_ENABLED` 控制） | 扫描 Web 端移动应用二维码，`/api/noauth/qr/{secret}` 换取令牌 |
 | 版本检查 (`modules/version`) | `store/version.ts`、`pages/update` | 最低版本强制更新、最新版本提示 |
 | 动态底部导航 (`modules/main`) | `pages/main` + `core/navigation.ts` | 服务器布局 / 角色默认布局，PE RBAC 过滤，3 项 + 更多（少于 4 项时为个人资料） |
 | 首页 (`modules/home`) | `views/HomeView` | 首页仪表板入口 + 仪表板列表；系统管理员显示租户列表 |
@@ -80,7 +80,7 @@ TB_API_ENDPOINT=https://iot.example.com npm run build:weapp
 
 ## 与 Flutter 版的差异 / 限制
 
-- **OAuth2 第三方登录**：小程序无法打开外部授权页并接收回调，暂不支持；可在 Web 端生成二维码后「扫码登录」。
+- **OAuth2 第三方登录**：小程序无法打开外部授权页并接收回调，暂不支持，请使用账号密码登录。
 - **推送通知（Firebase）**：小程序无 FCM，改为在主界面轮询未读数量（30 秒）。如需服务通知，可接入微信订阅消息。
 - **仪表板移动端动作**（扫码、拍照、定位等 JS Bridge）：`web-view` 无法与小程序原生通信，这些动作不可用。
 - **实时位置追踪**：Flutter 版由仪表板动作下发配置；小程序改为用户手动选择目标设备，固定键名上报（遥测 `latitude/longitude/accuracy/altitude/speed`，服务端属性 `gpsActive/gpsTrackedBy`），切后台后暂停。

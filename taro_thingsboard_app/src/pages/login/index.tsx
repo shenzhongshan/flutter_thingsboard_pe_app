@@ -10,6 +10,9 @@ import { Routes, go, relaunch } from '../../utils/router'
 import { normalizeEndpoint, parseUrl } from '../../utils/url'
 import './index.scss'
 
+/** 扫码登录入口暂时隐藏，逻辑保留；改为 true 即可恢复。 */
+const QR_LOGIN_ENABLED: boolean = false
+
 function afterLogin(status: AuthStatus) {
   if (status === 'twoFactor') {
     go(Routes.twoFactor)
@@ -128,18 +131,22 @@ export default function LoginPage() {
         <Button className='btn' loading={loading} disabled={loading} onClick={onLogin}>
           登录
         </Button>
-        <View className='divider'>
-          <View className='divider-line' />
-          <Text className='muted'>或</Text>
-          <View className='divider-line' />
-        </View>
-        <Button className='btn btn-outline' onClick={onScan}>
-          <Icon name='qr_code_scanner' size={40} color='#305680' />
-          <Text className='scan-text'>扫码登录</Text>
-        </Button>
+        {QR_LOGIN_ENABLED && (
+          <>
+            <View className='divider'>
+              <View className='divider-line' />
+              <Text className='muted'>或</Text>
+              <View className='divider-line' />
+            </View>
+            <Button className='btn btn-outline' onClick={onScan}>
+              <Icon name='qr_code_scanner' size={40} color='#305680' />
+              <Text className='scan-text'>扫码登录</Text>
+            </Button>
+          </>
+        )}
         {oauthCount > 0 && (
           <Text className='muted oauth-hint'>
-            该服务器配置了 {oauthCount} 个第三方登录方式，小程序暂不支持 OAuth2 跳转登录，可在网页端生成二维码后扫码登录。
+            该服务器配置了 {oauthCount} 个第三方登录方式，小程序暂不支持 OAuth2 跳转登录，请使用账号密码登录。
           </Text>
         )}
       </View>
