@@ -26,7 +26,7 @@ export default defineAppConfig({
   // 实时位置追踪需要的定位权限声明
   permission: {
     'scope.userLocation': {
-      desc: '用于实时位置追踪，将您的位置上报到 ThingsBoard 中选定的设备'
+      desc: '用于实时位置追踪并上报到选定设备'
     }
   },
   requiredPrivateInfos: ['getLocation', 'onLocationChange', 'startLocationUpdate'],
