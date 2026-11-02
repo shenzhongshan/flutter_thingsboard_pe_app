@@ -19,7 +19,6 @@
     "allowJs": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "allowImportingTsExtensions": true,
     "noEmit": true,
     "typeRoots": ["node_modules/@types"],
     "paths": {

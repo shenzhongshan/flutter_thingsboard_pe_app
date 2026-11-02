@@ -1,6 +1,8 @@
 import type { UserConfigExport } from '@tarojs/cli'
 
-export default {
+const config: UserConfigExport<'webpack5'> = {
   mini: {},
   h5: {}
-} satisfies UserConfigExport<'webpack5'>
+}
+
+export default config

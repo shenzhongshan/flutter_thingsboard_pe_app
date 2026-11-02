@@ -3,7 +3,6 @@
   "compilerOptions": {
     "module": "commonjs",
     "noEmit": false,
-    "allowImportingTsExtensions": false,
     "outDir": "../.test-build",
     "rootDir": "..",
     "sourceMap": false,
