@@ -42,25 +42,6 @@
   margin-bottom: 32px;
 }
 
-.server-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 20px 24px;
-  margin-bottom: 32px;
-  border-radius: 12px;
-  background: #eef3f8;
-}
-
-.server-text {
-  flex: 1;
-  font-size: 26px;
-  color: $text-secondary;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .password-wrap {
   position: relative;
 }

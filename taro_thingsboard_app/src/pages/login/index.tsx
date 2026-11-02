@@ -2,9 +2,8 @@ import { Button, Input, Text, View } from '@tarojs/components'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { useState } from 'react'
 import { exchangeQrSecret, getLoginMobileInfo } from '../../api/auth'
-import { session } from '../../api/http'
 import Icon from '../../components/Icon'
-import { FIXED_API_ENDPOINT } from '../../config'
+import { API_ENDPOINT } from '../../config'
 import { applyLoginResponse, loginWithPassword, showLoginError, type AuthStatus } from '../../store/auth'
 import { handleVersionInfo } from '../../store/version'
 import { Routes, go, relaunch } from '../../utils/router'
@@ -27,7 +26,6 @@ function afterLogin(status: AuthStatus) {
 
 /** 登录页，对应 Flutter 版 lib/core/auth/login/view/login_page.dart。 */
 export default function LoginPage() {
-  const [endpoint, setEndpoint] = useState(session.getEndpoint())
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -35,9 +33,6 @@ export default function LoginPage() {
   const [oauthCount, setOauthCount] = useState(0)
 
   useDidShow(() => {
-    const current = session.getEndpoint()
-    setEndpoint(current)
-    if (!current) return
     getLoginMobileInfo()
       .then((info) => {
         setOauthCount(info?.oAuth2ClientLoginInfos?.length || 0)
@@ -47,10 +42,6 @@ export default function LoginPage() {
   })
 
   const onLogin = async () => {
-    if (!session.getEndpoint()) {
-      go(Routes.region)
-      return
-    }
     if (!username.trim() || !password) {
       Taro.showToast({ title: '请输入用户名和密码', icon: 'none' })
       return
@@ -80,14 +71,12 @@ export default function LoginPage() {
     }
     const host = normalizeEndpoint(url.query.host || url.origin)
     const secret = url.query.secret
-    if (FIXED_API_ENDPOINT && host !== normalizeEndpoint(FIXED_API_ENDPOINT)) {
+    if (host !== normalizeEndpoint(API_ENDPOINT)) {
       Taro.showToast({ title: '二维码不属于当前服务器', icon: 'none' })
       return
     }
-    session.setEndpoint(host)
-    setEndpoint(host)
     if (!secret) {
-      Taro.showToast({ title: `已切换服务器：${host}`, icon: 'none' })
+      Taro.showToast({ title: '无法识别的二维码', icon: 'none' })
       return
     }
     Taro.showLoading({ title: '正在登录' })
@@ -109,13 +98,6 @@ export default function LoginPage() {
       </View>
       <View className='login-form'>
         <Text className='login-title'>登录您的账号</Text>
-        {!FIXED_API_ENDPOINT && (
-          <View className='server-row' onClick={() => go(Routes.region)}>
-            <Icon name='language' size={36} color='#305680' />
-            <Text className='server-text'>{endpoint || '请选择服务器'}</Text>
-            <Text className='link'>切换</Text>
-          </View>
-        )}
         <View className='form-item'>
           <Input
             className='form-input'

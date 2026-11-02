@@ -8,6 +8,7 @@
 ```bash
 cd taro_thingsboard_app
 npm install
+export TB_API_ENDPOINT=https://iot.example.com   # 必填，构建时写入小程序
 npm run dev:weapp          # 开发模式，输出到 dist/weapp
 npm run build:weapp        # 生产构建
 npm run build:h5           # H5 版本
@@ -22,7 +23,7 @@ npm run typecheck
 
 | 变量 | 作用 | 默认值 |
 | --- | --- | --- |
-| `TB_API_ENDPOINT` | 固定服务器地址，设置后隐藏「选择服务器」（对应 Flutter 版 `thingsboardApiEndpoint`） | 空（由用户选择） |
+| `TB_API_ENDPOINT` | **必填**。服务器地址，发布时确定并随小程序发布，用户不可切换（对应 Flutter 版 `thingsboardApiEndpoint`）。未设置时构建失败 | 无 |
 | `TB_MOBILE_PKG_NAME` | 查询移动中心时使用的包名 | 当前小程序的 AppID（运行时读取） |
 | `TB_MOBILE_PLATFORM` | 查询移动中心时使用的平台 | `WECHAT_MINIPROGRAM`，服务器不支持时自动回退为 `ANDROID` |
 | `TB_APP_VERSION` | 开发版 / 体验版的版本号（正式版使用微信返回的版本号） | `package.json` 中的 `version` |
@@ -61,7 +62,7 @@ TB_API_ENDPOINT=https://iot.example.com npm run build:weapp
 
 | Flutter 版模块 | 小程序实现 | 说明 |
 | --- | --- | --- |
-| 登录 / 选择区域 (`core/auth/login`, `select_region`) | `pages/login`、`pages/region` | 北美 / 欧洲 / 自定义服务器 |
+| 登录 (`core/auth/login`) | `pages/login` | 不提供 Flutter 版的区域选择，服务器地址由 `TB_API_ENDPOINT` 决定 |
 | 双因素认证 (`core/auth/2FA/confirm`) | `pages/two-factor` | TOTP / 短信 / 邮箱 / 备用码，支持切换方式、重发倒计时 |
 | 忘记密码 (`core/auth/reset_password`) | `pages/reset-password` | |
 | 扫码登录 (`core/auth/noauth`) | 登录页「扫码登录」 | 扫描 Web 端移动应用二维码，`/api/noauth/qr/{secret}` 换取令牌 |

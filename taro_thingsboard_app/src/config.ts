@@ -3,8 +3,8 @@
  * lib/utils/services/endpoint/endpoint_service.dart。
  */
 
-/** 构建时固定的服务器地址；非空时隐藏区域选择（与 Flutter 版 ignoreRegionSelection 一致）。 */
-export const FIXED_API_ENDPOINT: string = TB_API_ENDPOINT
+/** 服务器地址：发布时由 TB_API_ENDPOINT 确定并随小程序发布，用户不可切换（未设置时构建失败）。 */
+export const API_ENDPOINT: string = TB_API_ENDPOINT
 
 /**
  * 调用 /api/mobile 接口获取移动端布局（底部导航、首页仪表板）与版本信息时使用的包名与平台，
@@ -17,16 +17,5 @@ export const MOBILE_PLATFORM_OVERRIDE: string = TB_MOBILE_PLATFORM
 export const WECHAT_PLATFORM = 'WECHAT_MINIPROGRAM'
 export const FALLBACK_PLATFORM = 'ANDROID'
 export const FALLBACK_PKG_NAME = 'org.thingsboard.pe.miniprogram'
-
-export const NORTH_AMERICA_HOST = 'https://thingsboard.cloud'
-export const EUROPE_HOST = 'https://eu.thingsboard.cloud'
-
-export type Region = 'northAmerica' | 'europe' | 'custom'
-
-export const REGIONS: { id: Region; label: string; host?: string }[] = [
-  { id: 'northAmerica', label: '北美 (thingsboard.cloud)', host: NORTH_AMERICA_HOST },
-  { id: 'europe', label: '欧洲 (eu.thingsboard.cloud)', host: EUROPE_HOST },
-  { id: 'custom', label: '自定义服务器' }
-]
 
 export const DEFAULT_PAGE_SIZE = 20

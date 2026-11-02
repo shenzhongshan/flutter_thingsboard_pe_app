@@ -11,7 +11,7 @@ import './views/views.scss'
 appEvents.on('unauthorized', () => {
   const pages = Taro.getCurrentPages()
   const current = pages[pages.length - 1]?.route || ''
-  if (!current.includes('pages/login') && !current.includes('pages/region') && !current.includes('pages/reset-password')) {
+  if (!current.includes('pages/login') && !current.includes('pages/reset-password')) {
     relaunchToLogin()
   }
 })

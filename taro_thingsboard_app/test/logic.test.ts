@@ -3,6 +3,7 @@ import { test } from 'node:test'
 import { createDashboardEntityState, buildDashboardUrl } from '../src/core/dashboard'
 import { buildNavigation, defaultPageLayouts, navTargetForLayout, parsePageLayouts } from '../src/core/navigation'
 import { hasGenericPermission, hasReadGenericOrSharedGroupsPermission } from '../src/core/permissions'
+import { shouldRelaunchToLogin } from '../src/core/router-guard'
 import { base64Decode, base64Encode } from '../src/utils/base64'
 import { decodeJwt, isTokenExpired } from '../src/utils/jwt'
 import { normalizeEndpoint, parseUrl, readParam, withQuery } from '../src/utils/url'
@@ -135,4 +136,19 @@ test('version comparison and update status', async () => {
   assert.equal(checkUpdate('1.1.0', { minVersion: '1.1.0', latestVersion: '1.2.0' }), 'available')
   assert.equal(checkUpdate('1.2.0', { minVersion: '1.1.0', latestVersion: '1.2.0' }), 'none')
   assert.equal(checkUpdate('1.0.0', { minVersion: '', latestVersion: null }), 'none')
+})
+
+test('relaunch to login dedupes only in-flight, never by elapsed time', () => {
+  const onMain = { inFlight: false, pageCount: 1, currentRoute: '/pages/main/index' }
+  // 登出 / 401 / 主页面状态监听：第一次跳转
+  assert.equal(shouldRelaunchToLogin(onMain), true)
+  // 同一时刻的重复触发被跳过
+  assert.equal(shouldRelaunchToLogin({ ...onMain, inFlight: true }), false)
+  // 已经在登录页，无需重复 reLaunch
+  assert.equal(shouldRelaunchToLogin({ inFlight: false, pageCount: 1, currentRoute: '/pages/login/index' }), false)
+  // 登录页不在栈底时仍需回到登录页
+  assert.equal(shouldRelaunchToLogin({ inFlight: false, pageCount: 2, currentRoute: '/pages/login/index' }), true)
+  // 回归：上一次跳转已经结束，紧接着的登出必须能再次跳转，
+  // 旧实现用 1500ms 时间窗去重，会把它吞掉并让主页面卡在 splash。
+  assert.equal(shouldRelaunchToLogin(onMain), true)
 })

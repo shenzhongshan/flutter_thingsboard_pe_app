@@ -5,6 +5,10 @@ import prodConfig from './prod'
 
 // https://taro-docs.jd.com/docs/next/config#defineconfig-辅助函数
 export default defineConfig<'webpack5'>(async (merge) => {
+  // 服务器地址在发布时确定并随小程序发布，小程序内没有切换入口，缺失时必须在构建阶段失败
+  if (!process.env.TB_API_ENDPOINT) {
+    throw new Error('缺少 TB_API_ENDPOINT：请在构建时指定服务器地址，例如 TB_API_ENDPOINT=https://iot.example.com npm run build:weapp')
+  }
   const baseConfig: UserConfigExport<'webpack5'> = {
     projectName: 'thingsboard-pe-taro',
     date: '2026-10-29',
@@ -19,8 +23,8 @@ export default defineConfig<'webpack5'>(async (merge) => {
     outputRoot: `dist/${process.env.TARO_ENV}`,
     plugins: [],
     defineConstants: {
-      // 构建时可通过环境变量注入默认服务器地址，与 Flutter 版 --dart-define=thingsboardApiEndpoint 对应
-      TB_API_ENDPOINT: JSON.stringify(process.env.TB_API_ENDPOINT || ''),
+      // 服务器地址，与 Flutter 版 --dart-define=thingsboardApiEndpoint 对应
+      TB_API_ENDPOINT: JSON.stringify(process.env.TB_API_ENDPOINT),
       TB_MOBILE_PKG_NAME: JSON.stringify(process.env.TB_MOBILE_PKG_NAME || ''),
       TB_MOBILE_PLATFORM: JSON.stringify(process.env.TB_MOBILE_PLATFORM || ''),
       // 当前小程序版本，用于与移动中心配置的最低 / 最新版本比较（正式版以微信返回的版本号为准）

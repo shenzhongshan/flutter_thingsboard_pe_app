@@ -2,7 +2,6 @@ export default defineAppConfig({
   pages: [
     'pages/main/index',
     'pages/login/index',
-    'pages/region/index',
     'pages/two-factor/index',
     'pages/reset-password/index',
     'pages/section/index',

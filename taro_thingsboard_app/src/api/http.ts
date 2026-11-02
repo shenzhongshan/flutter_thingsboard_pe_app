@@ -1,9 +1,9 @@
 import Taro from '@tarojs/taro'
-import { FIXED_API_ENDPOINT } from '../config'
+import { API_ENDPOINT } from '../config'
 import { appEvents } from '../utils/events'
 import { isTokenExpired } from '../utils/jwt'
 import { StorageKeys, getItem, removeItem, setItem } from '../utils/storage'
-import { withQuery } from '../utils/url'
+import { normalizeEndpoint, withQuery } from '../utils/url'
 
 /**
  * ThingsBoard REST 客户端，对应 Flutter 版 thingsboard_pe_client 的 ThingsboardClient：
@@ -39,17 +39,13 @@ export interface RequestOptions {
   token?: string
 }
 
-let endpoint: string = getItem<string>(StorageKeys.endpoint) || FIXED_API_ENDPOINT || ''
+const endpoint = normalizeEndpoint(API_ENDPOINT)
 let jwtToken: string | undefined = getItem<string>(StorageKeys.token)
 let refreshToken: string | undefined = getItem<string>(StorageKeys.refreshToken)
 let refreshing: Promise<boolean> | null = null
 
 export const session = {
   getEndpoint: () => endpoint,
-  setEndpoint(value: string) {
-    endpoint = value
-    setItem(StorageKeys.endpoint, value)
-  },
   getToken: () => jwtToken,
   getRefreshToken: () => refreshToken,
   setTokens(token: string, refresh?: string | null) {

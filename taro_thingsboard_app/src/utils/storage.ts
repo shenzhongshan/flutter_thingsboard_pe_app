@@ -27,8 +27,6 @@ export function removeItem(key: string): void {
 }
 
 export const StorageKeys = {
-  endpoint: 'tb_endpoint',
-  region: 'tb_region',
   token: 'tb_jwt_token',
   refreshToken: 'tb_refresh_token',
   alarmFilters: 'tb_alarm_filters',

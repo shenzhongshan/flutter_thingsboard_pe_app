@@ -17,14 +17,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 cd taro_thingsboard_app
 npm install
-npm run build:weapp          # dist/weapp, open taro_thingsboard_app/ in WeChat DevTools
-npm run build:h5             # dist/h5
+TB_API_ENDPOINT=https://iot.example.com npm run build:weapp   # dist/weapp, open taro_thingsboard_app/ in WeChat DevTools
+TB_API_ENDPOINT=https://iot.example.com npm run build:h5      # dist/h5
 npm test                     # core logic unit tests (tsc to .test-build, node --test)
 npx tsc --noEmit -p .        # type check
 ```
 
 - **Build parameters**:
-  - `TB_API_ENDPOINT`: fixed server address; hides region selection.
+  - `TB_API_ENDPOINT`: required. The server address is fixed at publish time and ships with the mini program; there is no region selection. The build fails without it.
   - `TB_MOBILE_PKG_NAME`: override of the package name; default is the AppID read at runtime.
   - `TB_MOBILE_PLATFORM`: default is `WECHAT_MINIPROGRAM`.
   - `TB_APP_VERSION`: version for develop/trial builds.

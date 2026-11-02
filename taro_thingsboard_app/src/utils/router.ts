@@ -1,12 +1,12 @@
 import Taro from '@tarojs/taro'
 import type { NavTarget } from '../core/navigation'
+import { shouldRelaunchToLogin } from '../core/router-guard'
 import { base64Encode } from './base64'
 import { withQuery } from './url'
 
 /** 页面路由表与跳转辅助函数，对应 Flutter 版 ThingsboardAppRouter。 */
 export const Routes = {
   login: '/pages/login/index',
-  region: '/pages/region/index',
   twoFactor: '/pages/two-factor/index',
   resetPassword: '/pages/reset-password/index',
   main: '/pages/main/index',
@@ -57,15 +57,15 @@ export function openNavTarget(target: NavTarget, title?: string) {
   }
 }
 
-let lastLoginRelaunch = 0
+let loginRelaunchInFlight = false
 
 /** 回到登录页。登出、401、主页面状态监听可能同时触发，这里去重避免重复 reLaunch。 */
 export function relaunchToLogin() {
-  const now = Date.now()
-  if (now - lastLoginRelaunch < 1500) return
-  lastLoginRelaunch = now
   const pages = Taro.getCurrentPages()
   const current = pages[pages.length - 1]?.route || ''
-  if (pages.length === 1 && current.includes('pages/login')) return
-  Taro.reLaunch({ url: Routes.login })
+  if (!shouldRelaunchToLogin({ inFlight: loginRelaunchInFlight, pageCount: pages.length, currentRoute: current })) return
+  loginRelaunchInFlight = true
+  return Taro.reLaunch({ url: Routes.login }).catch(() => undefined).then(() => {
+    loginRelaunchInFlight = false
+  })
 }
