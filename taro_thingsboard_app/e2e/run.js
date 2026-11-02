@@ -1,6 +1,13 @@
 const { chromium } = require('playwright')
 const SP = process.argv[2] || __dirname
+const MOCK = process.env.TB_MOCK_ORIGIN || 'http://127.0.0.1:9090'
 ;(async () => {
+  // 用例会改写 mock server 的告警 / 评论 / 通知状态，先复位使套件可重复执行
+  const reset = await fetch(`${MOCK}/__reset`, { method: 'POST' }).catch((e) => e)
+  if (!(reset && reset.ok)) {
+    console.error(`无法复位 mock server (${MOCK}/__reset)，请先启动 node e2e/mock-server.js`)
+    process.exit(1)
+  }
   const browser = await chromium.launch()
   const page = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 })
   page.setDefaultTimeout(8000)
@@ -8,17 +15,41 @@ const SP = process.argv[2] || __dirname
   page.on('pageerror', (e) => errors.push('pageerror: ' + e.message))
   page.on('console', (m) => m.type() === 'error' && errors.push('console: ' + m.text()))
   const shot = (n) => page.screenshot({ path: `${SP}/${n}.png` })
+  // Taro 在 H5 上关闭弹窗后会把节点留在 DOM 里（隐藏），必须按可见性筛选，
+  // 否则 .last() 会选中上一个弹窗的按钮并一直等待超时。
+  // Taro H5 的 hide() 定时器（动画 350ms）不会被 show() 取消：打开页面后 350ms 内返回，
+  // 上一页随后会被隐藏成空白。真人点不了这么快，这里按动画时长等待，避免脚本踩中。
+  const settle = () => page.waitForTimeout(450)
+  const back = async () => { await settle(); await page.goBack(); await settle() }
+  const tapModalConfirm = () => page.getByText('确定', { exact: true }).filter({ visible: true }).last().click()
   const step = async (name, fn) => { try { await fn(); console.log('OK  ', name) } catch (e) { console.log('FAIL', name, e.message.split('\n')[0]); await shot('fail-' + name.replace(/\W+/g, '_')) } }
 
   await page.goto('http://127.0.0.1:8080/')
   await step('redirect to login', async () => { await page.getByText('登录您的账号').waitFor({ timeout: 10000 }); await shot('01-login') })
+  await step('server is fixed at build time', async () => {
+    if (await page.getByText('切换', { exact: true }).count()) throw new Error('server switch still shown')
+    if (await page.getByText('请选择服务器').count()) throw new Error('server picker still shown')
+  })
   await step('wrong password shows error', async () => {
     await page.locator('input[placeholder="用户名（电子邮箱）"]').fill('tenant@thingsboard.org')
     await page.locator('input[placeholder="密码"]').fill('bad')
     await page.getByText('登录', { exact: true }).last().click()
     await page.getByText('Invalid username or password').waitFor({ timeout: 5000, state: 'attached' })
   })
+  await step('other tenant is signed out with a notice', async () => {
+    // 租户自建的小程序只服务本租户：/api/mobile 返回 403 时必须登出并提示，不得进入应用
+    await page.locator('input[placeholder="用户名（电子邮箱）"]').fill('other@x.com')
+    await page.locator('input[placeholder="密码"]').fill('x')
+    await page.getByText('登录', { exact: true }).last().click()
+    await page.getByText('该账号不属于本小程序所属的租户，请使用本租户的账号登录。').waitFor({ timeout: 5000 })
+    await shot('01b-tenant-mismatch')
+    await tapModalConfirm()
+    await page.getByText('登录您的账号').waitFor({ timeout: 5000 })
+    const token = await page.evaluate(() => localStorage.getItem('tb_jwt_token'))
+    if (token) throw new Error('token kept after tenant mismatch')
+  })
   await step('login ok -> home', async () => {
+    await page.locator('input[placeholder="用户名（电子邮箱）"]').fill('tenant@thingsboard.org')
     await page.locator('input[placeholder="密码"]').fill('tenant')
     await page.getByText('登录', { exact: true }).last().click()
     await page.getByText('工厂总览').waitFor({ timeout: 10000 })
@@ -37,13 +68,13 @@ const SP = process.argv[2] || __dirname
     await page.getByText('Thermometer A').first().click()
     await page.getByText('基本信息').waitFor()
     await page.getByText('确认', { exact: true }).click()
-    await page.getByText('确定', { exact: true }).last().click()
+    await tapModalConfirm()
     await page.getByText('Alarm was acknowledged by user Tenant Admin').waitFor({ timeout: 5000 })
     await page.locator('input[placeholder="添加评论…"]').fill('正在现场处理')
     await page.getByText('发送', { exact: true }).click()
     await page.getByText('正在现场处理').waitFor({ timeout: 5000 })
     await shot('04-alarm-detail')
-    await page.goBack()
+    await back()
   })
   await step('alarm filter page', async () => {
     await page.locator('.bottom-label', { hasText: '告警' }).waitFor()
@@ -82,7 +113,7 @@ const SP = process.argv[2] || __dirname
     const src = await frame.getAttribute('src')
     console.log('     iframe src:', src.slice(0, 120) + '…')
     if (!src.includes('/dashboard/d-1?accessToken=') || !src.includes('&state=')) throw new Error('bad src ' + src)
-    await page.goBack(); await page.goBack(); await page.goBack()
+    await back(); await back(); await back()
   })
   await step('more menu + notifications badge', async () => {
     await page.locator('.bottom-label', { hasText: '更多' }).click()
@@ -96,13 +127,13 @@ const SP = process.argv[2] || __dirname
     await page.getByText('Customer A').click()
     await page.getByText('Shanghai').waitFor()
     await shot('10-customer')
-    await page.goBack(); await page.goBack()
+    await back(); await back()
   })
   await step('audit logs -> detail', async () => {
     await page.locator('.menu-title', { hasText: '审计日志' }).click()
     await page.getByText('设备 · Thermometer A').click()
     await page.getByText('操作数据').waitFor()
-    await page.goBack(); await page.goBack()
+    await back(); await back()
   })
   await step('notifications mark all read', async () => {
     await page.locator('.menu-title', { hasText: '通知' }).click()
@@ -110,7 +141,7 @@ const SP = process.argv[2] || __dirname
     await shot('11-notifications')
     await page.locator('.toolbar .toolbar-btn').click()
     await page.getByText('没有未读通知').waitFor()
-    await page.goBack()
+    await back()
     await page.locator('.menu-item', { hasText: '通知' }).waitFor()
     await page.waitForTimeout(500)
     if (await page.locator('.menu-item', { hasText: '通知' }).locator('.badge').count()) throw new Error('badge not cleared')
@@ -119,11 +150,11 @@ const SP = process.argv[2] || __dirname
     await page.locator('.menu-title', { hasText: '个人资料' }).click()
     await page.getByText('电子邮箱 *').waitFor()
     await shot('12-profile')
-    await page.goBack()
+    await back()
   })
   await step('logout', async () => {
     await page.locator('.menu-title:visible', { hasText: '退出登录' }).click()
-    await page.getByText('确定', { exact: true }).last().click()
+    await tapModalConfirm()
     await page.getByText('登录您的账号').waitFor({ timeout: 5000 })
   })
   await step('2FA flow', async () => {

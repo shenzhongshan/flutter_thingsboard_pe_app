@@ -6,16 +6,27 @@ const jwtUserId = (req) => { try { return JSON.parse(Buffer.from(req.headers['x-
 const id = (t, i) => ({ entityType: t, id: i })
 const page = (data) => ({ data, totalPages: 1, totalElements: data.length, hasNext: false })
 const log = []
-let alarm = {
-  id: id('ALARM', 'a1'), createdTime: Date.now() - 600000, type: 'High Temperature', originator: id('DEVICE', 'd1'),
-  originatorName: 'Thermometer A', severity: 'CRITICAL', acknowledged: false, cleared: false, startTs: Date.now() - 600000,
-  endTs: Date.now(), assignee: null, details: { temperature: 87 }
+let alarm, comments, notifications
+
+/**
+ * 告警、评论与通知都会被用例改写（确认、评论、标记已读），
+ * 跑完一轮后服务端状态已经变脏，直接重跑会失败。
+ * run.js 启动时调用 POST /__reset 把它们恢复到初始值，使套件可重复执行。
+ */
+function resetState() {
+  alarm = {
+    id: id('ALARM', 'a1'), createdTime: Date.now() - 600000, type: 'High Temperature', originator: id('DEVICE', 'd1'),
+    originatorName: 'Thermometer A', severity: 'CRITICAL', acknowledged: false, cleared: false, startTs: Date.now() - 600000,
+    endTs: Date.now(), assignee: null, details: { temperature: 87 }
+  }
+  comments = [{ id: id('ALARM_COMMENT', 'c1'), createdTime: Date.now() - 500000, type: 'SYSTEM', comment: { text: 'Alarm created' } }]
+  notifications = [
+    { id: id('NOTIFICATION', 'n1'), createdTime: Date.now() - 60000, subject: '设备离线', text: 'Thermometer B 已离线', type: 'DEVICE_ACTIVITY', status: 'SENT', info: {} },
+    { id: id('NOTIFICATION', 'n2'), createdTime: Date.now() - 120000, subject: '新告警', text: 'High Temperature on Thermometer A', type: 'ALARM', status: 'SENT', info: { alarmId: 'a1', alarmSeverity: 'CRITICAL' } }
+  ]
+  log.length = 0
 }
-let comments = [{ id: id('ALARM_COMMENT', 'c1'), createdTime: Date.now() - 500000, type: 'SYSTEM', comment: { text: 'Alarm created' } }]
-let notifications = [
-  { id: id('NOTIFICATION', 'n1'), createdTime: Date.now() - 60000, subject: '设备离线', text: 'Thermometer B 已离线', type: 'DEVICE_ACTIVITY', status: 'SENT', info: {} },
-  { id: id('NOTIFICATION', 'n2'), createdTime: Date.now() - 120000, subject: '新告警', text: 'High Temperature on Thermometer A', type: 'ALARM', status: 'SENT', info: { alarmId: 'a1', alarmSeverity: 'CRITICAL' } }
-]
+resetState()
 const routes = {
   'POST /api/auth/login': (b) => b.username === 'tenant@thingsboard.org' && b.password === 'tenant'
     ? [200, { token: mkJwt(['TENANT_ADMIN']), refreshToken: 'r1' }]
@@ -72,6 +83,7 @@ http.createServer((req, res) => {
     const q = Object.fromEntries(new URLSearchParams(qs))
     log.push(`${req.method} ${req.url}`)
     let key = `${req.method} ${path}`
+    if (key === 'POST /__reset') { resetState(); res.writeHead(200, { 'Content-Type': 'application/json' }); return res.end('{"reset":true}') }
     let m = req.method === 'PUT' && /^\/api\/notification\/(.+)\/read$/.exec(path)
     let h = routes[key]
     if (m) h = () => { notifications = notifications.map((n) => (n.id.id === m[1] ? { ...n, status: 'READ' } : n)); return [200, null] }
